@@ -12,6 +12,7 @@
             body {
                 text-align: center;
                 font-family: Helvetica, Arial, sans-serif;
+                background-color: floralwhite;
             }
             h1 {
                 padding: 1vh 15vw;
@@ -32,18 +33,30 @@
             div {
                 padding: 2vh 6vw;
             }
+            .legend {
+                font-size: 6px;
+            }
         </style>
     </head>
     <body>
         <header>
-            <h1>Datos Chile</h1>
+            <h1>Datos poblacionales Chile</h1>
         </header>
         <main>
             <article>
                 <h2>Evolución de la población mayor Chile 2010-2021</h2>
-                <p>Con una <a href="https://datavizcatalogue.com/ES/metodos/grafica_de_linea.html" target="_blank">gráfica de línea</a></p>
+                <p><a href="https://www.ine.gob.cl/docs/default-source/documentos-de-trabajo/envejecimiento-en-chile-evolucion-y-caracteristicas-de-las-personas-mayores.pdf?sfvrsn=fa394551_2" target="_blank">INE, 2022</a></p>
                 <div>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 570 210">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 210">
+                        <g class="legend">
+                            <rect x="5" y="10" width="10" height="10" fill="darkolivegreen" />
+                            <text x="25" y="18">Total</text>
+                            <rect x="150" y="10" width="10" height="10" fill="brown" />
+                            <text x="165" y="18">Tercera edad (60-79 años)</text>
+                            <rect x="330" y="10" width="10" height="10" fill="rosybrown" />
+                            <text x="345" y="18">Cuarta edad (80 años o más)</text>
+                        </g>
+
                         <g transform="translate(0,195) scale(1,-1)" id="lineas"></g>
                         <g id="years"></g>
                     </svg>
@@ -51,7 +64,7 @@
             </article>
             <article>
                 <h2>Población por rango etario Chile 2021</h2>
-                <p>Con una <a href="https://datavizcatalogue.com/ES/metodos/graficos_de_barras.html" target="_blank">gráfica de barras</a></p>
+                <p><a href="https://www.ine.gob.cl/estadisticas/sociales/demografia-y-vitales/proyecciones-de-poblacion" target="_blank">INE, 2021</a></p>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 180" id="barras"></svg>
                 </div>
@@ -59,25 +72,33 @@
         </main>
         <footer>
             <p>
-                <small>Revisar lo de Data-Ink Ratio en <a href="https://infovis-wiki.net/wiki/Data-Ink_Ratio" target="_blank">infovis</a></small>
+                <small>2024</small>
             </p>
         </footer>
         <script>
             const lineal = {
-                censos: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
-                censados: [2268702, 2357776, 2452441, 2551090, 2653294, 2758908, 2867961, 2980921, 3103713, 3224540, 3348010, 3472243],
+                anos: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+                total: [2268702, 2357776, 2452441, 2551090, 2653294, 2758908, 2867961, 2980921, 3103713, 3224540, 3348010, 3472243],
+                terceraEdad: [1900284, 1968280, 2044382, 2125604, 2211642, 2301830, 2395282, 2491810, 2596410, 2698032, 2801176, 2904173],
+                cuartaEdad: [368418, 388956, 408059, 425486, 441652, 457078, 472679, 489111, 507303, 526508, 546834, 568070],
             };
 
             const graficaLineas = document.querySelector("#lineas");
-            let coordenadas = "";
+            let coordenadasTotal = "";
+            let coordenadasTercera = "";
+            let coordenadasCuarta = "";
             let momentos = "";
 
-            lineal.censados.forEach((d, i) => {
-                coordenadas += i * 50 + 7 + "," + Math.round(d * 0.000025) + " ";
-                momentos += `<text x="${i * 50}" y="205" font-size="6">${lineal.censos[i]}</text> `;
+            lineal.total.forEach((d, i) => {
+                coordenadasTotal += `${i * 50 + 7},${Math.round(d * 0.000025)} `;
+                coordenadasTercera += `${i * 50 + 7},${Math.round(lineal.terceraEdad[i] * 0.000025)} `;
+                coordenadasCuarta += `${i * 50 + 7},${Math.round(lineal.cuartaEdad[i] * 0.000025)} `;
+                momentos += `<text x="${i * 50}" y="205" font-size="6">${lineal.anos[i]}</text>`;
             });
 
-            graficaLineas.innerHTML += `<polyline points="${coordenadas}" fill="none" stroke="crimson" stroke-width="1"/>`;
+            graficaLineas.innerHTML += `<polyline points="${coordenadasTotal}" fill="none" stroke="darkolivegreen" stroke-width="1"/>`;
+            graficaLineas.innerHTML += `<polyline points="${coordenadasTercera}" fill="none" stroke="brown" stroke-width="1"/>`;
+            graficaLineas.innerHTML += `<polyline points="${coordenadasCuarta}" fill="none" stroke="rosybrown" stroke-width="1"/>`;
             document.querySelector("#years").innerHTML += momentos;
 
             const barras = [
@@ -99,7 +120,7 @@
 
             barras.forEach((d, i) => {
                 graficaBarras.innerHTML += `<g transform="translate(0,${i * 15})">
-                    <rect x="0" y="0" width="${d.numero / 10000}" height="10" fill="crimson"/>
+                    <rect x="0" y="0" width="${d.numero / 10000}" height="10" fill="indianred"/>
                     <text x="3" y="7" fill="white" font-size="5">${d.rango}</text>
                     <text x="${d.numero / 10000 + 3}" y="7" font-size="6">${new Intl.NumberFormat("es-ES").format(d.numero)} habitantes</text>
                 </g>`;
