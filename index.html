@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Práctica (para la clase)</title>
+        <style>
+            *{ margin:0; padding:0; }
+            body{ text-align: center; font-family: Helvetica, Arial, sans-serif; }
+            h1 { padding:1vh 15vw; }
+            h2, p{ padding:.5vh 0; }
+            header, article, footer{ padding:5vh 0; }
+            header, article{ border-bottom:1px dotted black; }
+            div{ padding:2vh 6vw; }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Tufte refers to data-ink as the non-erasable ink used for the presentation of data</h1>
+        </header>
+        <main>
+            <article>
+                <h2>Evolución de la población mayor Chile 2010-2021</h2>
+                <p>Con una <a href="https://datavizcatalogue.com/ES/metodos/grafica_de_linea.html" target="_blank">gráfica de línea</a></p>
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 570 210">
+                        <g transform="translate(0,195) scale(1,-1)" id="lineas"><!--aquí dentro va la polyline--></g>
+                        <g id="years"><!--aquí dentro van los textos con los años--></g>
+                    </svg>
+                </div>
+            </article>
+            <article>
+                <h2>Población por rango etario Chile 2021</h2>
+                <p>Con una <a href="https://datavizcatalogue.com/ES/metodos/graficos_de_barras.html" target="_blank">gráfica de barras</a></p>
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 100" id="barras"><!--aquí dentro van los grupos con rectangulo y textos--></svg>
+                </div> 
+            </article>
+        </main>
+        <footer>
+            <p><small>Revisar lo de Data-Ink Ratio en <a href="https://infovis-wiki.net/wiki/Data-Ink_Ratio" target="_blank">infovis</a></small></p>
+        </footer>
+        <script>
+
+
+            //PRIMERA GRÁFICA
+
+            // Datos de https://www.ine.gob.cl/docs/default-source/documentos-de-trabajo/envejecimiento-en-chile-evolucion-y-caracteristicas-de-las-personas-mayores.pdf?sfvrsn=fa394551_2
+
+            const lineal = {
+                censos: [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+                censados: [2268702, 2357776, 2452441, 2551090, 2653294, 2758908, 2867961, 2980921, 3103713, 3224540, 3348010, 3472243],
+            }; //al cambiar un valor automáticamente se cambia el lugar del punto de la linea
+
+            const graficaLineas = document.querySelector("#lineas");
+
+            let coordenadas = "";
+
+            let momentos = "" //va a buscar y se aprovecha de [i] que es 0, 1, 2, 3, 4 y así se construye
+
+            // la manera de despliegue de las coordenadas del Eje Y nos exige un ajuste, que copiamos de https://stackoverflow.com/questions/39560206/change-0-0-from-svg (ESTO ES EL AJUSTE PARA QUE EL GRÁFICO SE DE VUELTA Y QUEDE DE ABAJO PA ARRIBA EN VEZ DE ARRIBA PA ABAJO)
+
+            lineal.censados.forEach((d, i) => {
+                coordenadas += ((i*50)+7) + "," + Math.round(d*0.000025) + " ";
+                momentos += `<text x="${i*50}" y="205" font-size="6">${lineal.censos[i]}</text> `;
+
+            })
+
+            console.log(coordenadas);
+
+            console.log(momentos);
+
+            graficaLineas.innerHTML += `<polyline points="${coordenadas}" fill="none" stroke="crimson" stroke-width="1"/>`;
+
+            document.querySelector("#years").innerHTML += momentos;
+
+
+            // SEGUNDA GRÁFICA (es más sensillo)
+
+            // Datos de https://es.wikipedia.org/wiki/Anexo:Regiones_de_Chile_por_poblaci%C3%B3n
+
+            const barras = [
+    { rango: "Menos de 14 años", numero: 3498275 },
+    { rango: "14 a 17 años", numero: 979248 },
+    { rango: "18 a 24 años", numero: 1927076 },
+    { rango: "25 a 29 años", numero: 1629871 },
+    { rango: "30 a 34 años", numero: 1659478 },
+    { rango: "35 a 39 años", numero: 1461105 },
+    { rango: "40 a 44 años", numero: 1362172 },
+    { rango: "45 a 49 años", numero: 1296281 },
+    { rango: "50 a 54 años", numero: 1225010 },
+    { rango: "55 a 59 años", numero: 1167604 },
+    { rango: "60 a 64 años", numero: 1013544 },
+    { rango: "65 años o más", numero: 2458699 }
+                ]
+// region:"nombre región", numero: numero de habitantes
+            const graficaBarras = document.querySelector("#barras");
+
+// aquí hay una custión que se pone 0 y 0 que ta diciendo trsnalada la barra a ninguna parte
+            // y luego se mueve el texto del numero de habitantes
+            //hacemos una transformación de los datos del numero, debido a que en inglés se una la coma para 1,000=mil y 1.000=uno coma cero y eso en español chile es al revés
+            barras.forEach((d, i) => {
+                graficaBarras.innerHTML += `<g transform="translate(0,${i*15})">
+                    <rect x="0" y="0" width="${d.numero/10000}" height="10" fill="crimson"/>
+                    <text x="3" y="7" fill="white" font-size="5">${d.rango}</text>
+                    <text x="${(d.numero/10000)+3}" y="7" font-size="6">${new Intl.NumberFormat("es-ES").format(d.numero)} habitantes</text>
+                </g>`
+            });
+        </script>
+    </body>
+</html>
+
+
+
+
+
+
